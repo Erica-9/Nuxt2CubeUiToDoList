@@ -1,11 +1,21 @@
 // store/ToDoListStore.js
 export const state = () => ({
-  newPage: "life",
+  newPage: "Life",
   lifeTasks: [],
   startId: 1,
-  temperature: "",
-  bodyTemperature: "",
 });
+
+export const getters = {
+  newPage(state) {
+    return state.newPage;
+  },
+  lifeTasks(state) {
+    return state.lifeTasks;
+  },
+  startId(state) {
+    return state.startId;
+  },
+};
 
 export const mutations = {
   addTask(state, list) {
@@ -83,4 +93,12 @@ export const actions = {
     //Dev 硯丞 儲存目前更換頁面，pageName -> 更換的頁面(string)
     commit("changePage", pageName);
   },
+};
+
+export default {
+  namespaced: true, // 添加命名空間
+  state,
+  getters,
+  mutations,
+  actions,
 };

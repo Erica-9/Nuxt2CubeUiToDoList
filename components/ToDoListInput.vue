@@ -6,35 +6,57 @@
 </template>
 
 <script>
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 export default {
   data() {
     return {
-      newTask: "",//Dev 硯丞 目前輸入的文字
-      store: this.$store.state.ToDoListStore, //Dev 硯丞 store內的state
+      newTask: "",//Dev 硯丞 目前輸入的文字 //Dev 硯丞 store內的state
 
     };
   },
+  computed: {
+    ...mapGetters({   // 對象形式 
+      startId: "ToDoListStore/startId",
+      newPage: "ToDoListStore/newPage",
+    }),
+  },
   methods: {
-    addTask() { //Dev 硯丞 把輸入的資料賦予id、類型、完成情況後加入清單
+    ...mapActions({   // 對象形式 
+      addTaskStore: "ToDoListStore/addTask",
+    }),
+    ...mapMutations({
+      addStartId: "ToDoListStore/addStartId",
+    }),
+    addTask() {
+      //Dev 硯丞 把輸入的資料賦予id、類型、完成情況後加入清單，把初始id+1，以保持id的唯一性，並清空input存取的值
       if (this.newTask !== "") {
         const list = {
-          id: this.store.startId,
+          id: this.startId,
           task: this.newTask,
           done: false,
-          cateGory: this.store.newPage
+          cateGory: this.newPage
         }
-        this.$store.dispatch("ToDoListStore/addTask", list);
-        this.$store.commit("ToDoListStore/addStartId")
+        this.addTaskStore(list);
+        this.addStartId();
         this.newTask = "";
       }
     }
+  },
+  mounted() {
+    this.$localStorage.set("data", { name: "bobee" });
+    this.$cookies.set("bobee", { age: 11 });
+    // this.$session.set('user', { name: 'John', age: 30 });
+
+    console.log("localStorage:", this.$localStorage.get("data"));
+    console.log("cookies:", this.$cookies.get("bobee"));
+    // console.log("session:", this.$session.get('user'));
   }
 };
 </script>
 
 <style scoped>
 .inputLayout {
-  margin-top: 10px;
+  width: 100%;
   display: flex;
 }
 
@@ -50,5 +72,24 @@ export default {
 
 .inputLayout Input {
   border-radius: 10px;
+}
+
+@media (max-width: 300px) {
+  .listInput {
+    width: 85%;
+  }
+
+  .inputLayout button {
+    width: 20%;
+    padding: 10px;
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 300px) and (max-width: 575px) {
+  .inputLayout button {
+    padding: 10px;
+    font-size: 12px;
+  }
 }
 </style>

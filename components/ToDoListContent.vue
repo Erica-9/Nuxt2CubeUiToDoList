@@ -1,16 +1,15 @@
 <template>
     <div class="listLayout">
         <div class="listButton">
-            <div>
-                <button @click="filterList('life')" :class="{ filterButtom: filterButtom('life') }"
-                    class="otherButton">生活</button>
-                <button @click="filterList('work')" :class="{ filterButtom: filterButtom('work') }"
-                    class="otherButton">工作</button>
+            <div class="selected">
+                <div v-show="lists.length != 0">已選取{{ newSelects.length }}項任務</div>
+                <cube-button v-show="newSelects.length != 0" :light="true" class="selectedButton"
+                    @click="finishList">完成</cube-button>
+                <cube-button v-show="newSelects.length != 0" :light="true" class="selectedButton"
+                    @click="deleteList">刪除</cube-button>
             </div>
-            <div class="selected" v-show="newSelects.length != 0">
-                <div>已選取{{ newSelects.length }}項任務</div>
-                <cube-button :light="true" class="selectedButton" @click="finishList">完成</cube-button>
-                <cube-button :light="true" class="selectedButton" @click="deleteList">刪除</cube-button>
+            <div class="weaterButton">
+                <cube-button :outline="true" @click="showAlert">現在天氣</cube-button>
             </div>
         </div>
         <div>
@@ -18,7 +17,7 @@
                 <li v-if="lists.length === 0" class="noList">您未新增任何待辦清單</li>
                 <cube-checkbox-group v-else v-model="newSelects" v-for="(List, index) in lists" :key="List.id"
                     :class="{ finishList: List.done }" class="list">
-                    <cube-checkbox :option="{ value: List.id }" v-show="!List.done" v-if="edit != List.id">
+                    <cube-checkbox :option="{ value: List.id }" v-show="!List.done & edit != List.id">
                     </cube-checkbox>
                     <i class="listText">
                         <div v-if="edit == List.id" class="listContent">
@@ -52,29 +51,57 @@
 </template>
 
 <script>
+import axios from 'axios'
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 export default {
     data() {
         return {
-            store: this.$store.state.ToDoListStore, //Dev 硯丞 store內的state
             newSelects: [], //Dev 硯丞 目前選取的所有待辦清單id
             newTask: "", //Dev 硯丞 點選編輯後輸入的內容
             edit: "", //Dev 硯丞 儲存目前點選編輯的待辦清單id
         };
     },
     computed: {
+        ...mapGetters({   // 對象形式 
+            newPage: "ToDoListStore/newPage",
+            lifeTasks: "ToDoListStore/lifeTasks",
+        }),
         lists() {
-            // Dev 硯丞 重新渲染時清空目前選取的清單並篩選目前需顯示的待辦清單類型是工作還是生活
+            // Dev 硯丞 重新渲染時清空目前選取的清單及編輯的id並篩選目前需顯示的待辦清單類型是工作還是生活
             this.newSelects = []
-            return this.store.lifeTasks.filter(i => i.cateGory === this.store.newPage)
+            this.edit = ""
+            this.newSelects = []
+            return this.lifeTasks.filter(i => i.cateGory === this.newPage)
         }
 
     },
     methods: {
+        ...mapActions({   // 對象形式 
+            editListTextStore: "ToDoListStore/editListText",
+            deleteListStore: "ToDoListStore/deleteList",
+            finishListStore: "ToDoListStore/finishList",
+        }),
+        ...mapMutations({
+            clearList: "ToDoListStore/clearList",
+        }),
+        showAlert() {
+            //Dev 硯丞 接取氣象局開源api，獲取現在西區的體感溫度及溫度
+            const url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?Authorization=CWA-0607CF65-9F25-43CD-A406-925A5427FB91&locationName=%E8%A5%BF%E5%8D%80&elementName=AT,T"
+            axios.get(url).then((res) => {
+                const a = res.data.records.locations[0].location[0].weatherElement[0].time[0].elementValue[0].value
+                const b = res.data.records.locations[0].location[0].weatherElement[1].time[0].elementValue[0].value
+                this.$createDialog({
+                    type: 'alert',
+                    title: '現在天氣',
+                    content: "體感溫度：" + a + "℃" + " 溫度：" + b + "℃"
+                }).show()
+            });
+        },
         addTask() {
             //Dev Note 硯丞 將要修改的待辦清單id及內容傳送到ToDoListthis.store做儲存，並清空要輸入的內容及選取的id，
             if (this.newTask != "") {
                 const edit = { id: this.edit, text: this.newTask }
-                this.$store.dispatch("ToDoListStore/editListText", edit);
+                this.editListTextStore(edit);
                 this.newTask = "";
                 this.edit = ""
             }
@@ -87,30 +114,19 @@ export default {
             this.newTask = text
             this.newSelects = []
         },
-        filterList(Change) {
-            /*Dev Note 硯丞 切換要顯示的待辦清單後，更改存取在ToDoListStore，目前的清單頁面，
-            清空已選取的待辦清單，取消需編輯的待辦清單，Change -> 要更換頁面名稱(string)*/
-            this.$store.dispatch("ToDoListStore/changePage", Change);
-            this.newSelects = []
-            this.edit = ""
-        },
-        filterButtom(Filter) {
-            //Dev Note 硯丞 切換待辦清單類型的按鈕class判斷，Filter -> 點選的按鈕要切換的頁面名稱(string)
-            return this.store.newPage == Filter
-        },
         deleteList() {
             //Dev Note 硯丞 刪除newSelects內已選取的待辦清單
-            this.$store.dispatch("ToDoListStore/deleteList", this.newSelects);
+            this.deleteListStore(this.newSelects);
             this.newSelects = []
         },
         finishList() {
-            this.$store.dispatch("ToDoListStore/finishList", this.newSelects);
+            this.finishListStore(this.newSelects);
             //Dev Note 硯丞 完成newSelects內已選取的待辦清單
             this.newSelects = []
         },
         clearList() {
             //Dev Note 硯丞 清空所有待辦清單
-            this.$store.commit("ToDoListStore/clearList")
+            this.clearList()
             this.newSelects = []
         },
     },
@@ -129,6 +145,7 @@ export default {
 }
 
 .selected {
+    padding: 5px 0;
     display: flex;
     margin-bottom: 3px;
 }
@@ -137,11 +154,6 @@ export default {
     width: 100%;
     display: flex;
     justify-content: space-between;
-}
-
-.filterButtom {
-    color: #4a4c5b;
-    background-color: rgb(255, 255, 255);
 }
 
 .finishButton {
@@ -155,14 +167,6 @@ export default {
 .filterFinishButtom {
     color: white;
     background-color: rgb(189, 189, 189);
-}
-
-.otherButton {
-    height: 35px;
-    padding: 0 5px;
-    border-radius: 5px 5px 0 0;
-    margin-right: 5px;
-    border: 0px;
 }
 
 ul {
@@ -276,12 +280,13 @@ li input {
 }
 
 .list {
+    height: auto;
     display: flex;
 }
 
 .listText {
-    min-width: 88%;
-    max-width: 100%;
+    width: 85%;
+    display: flex;
 }
 
 .checkButton {
@@ -290,5 +295,83 @@ li input {
 
 .noList {
     padding: 10px;
+}
+
+.weaterButton {
+    display: flex;
+    padding: 5px 0;
+    margin-bottom: 3px;
+    margin-left: 5px;
+}
+
+.weaterButton button {
+    padding: 10px;
+}
+
+@media (max-width: 300px) {
+    .weaterButton button {
+        padding: 5px;
+        font-size: 12px;
+    }
+
+    .listText {
+        width: 65%;
+    }
+
+    .contentButton button {
+        width: auto;
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .checkButton {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .clearList {
+        padding: 10px;
+        font-size: 12px;
+    }
+}
+
+@media (min-width: 300px) and (max-width: 450px) {
+    .listText {
+        width: 75%;
+    }
+
+    .contentButton button {
+        width: auto;
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .checkButton {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .clearList {
+        padding: 10px;
+        font-size: 12px;
+    }
+}
+
+@media (min-width: 450px) and (max-width: 575px) {
+
+    .contentButton button {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .checkButton {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .clearList {
+        padding: 10px;
+        font-size: 12px;
+    }
 }
 </style>
