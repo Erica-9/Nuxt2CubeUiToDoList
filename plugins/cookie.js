@@ -18,7 +18,6 @@ export default ({ app }, inject) => {
     removeAll: () => {
       const NodeList = Object.keys(Cookies.get());
       NodeList.forEach((el) => Cookies.remove(el));
-      window.location.replace("/");
     },
   });
 };

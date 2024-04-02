@@ -64,10 +64,10 @@ export default {
         };
     },
     computed: {
-        ...mapGetters({   // 對象形式 
-            newPage: "ToDoListStore/newPage",
-            lifeTasks: "ToDoListStore/lifeTasks",
-            weather: "WeatherStore/weather"
+        ...mapGetters({
+            newPage: "ToDoListStore/newPage", //Dev 硯丞 目前頁面
+            lifeTasks: "ToDoListStore/lifeTasks", //Dev 硯丞 全部的待辦清單
+            weather: "WeatherStore/weather" //Dev 硯丞 目前天氣
         }),
         lists() {
             // Dev 硯丞 重新渲染時清空目前選取的清單及編輯的id並篩選目前需顯示的待辦清單類型是工作還是生活
@@ -79,17 +79,17 @@ export default {
 
     },
     methods: {
-        ...mapActions({   // 對象形式 
-            editListTextStore: "ToDoListStore/editListText",
-            deleteListStore: "ToDoListStore/deleteList",
-            finishListStore: "ToDoListStore/finishList",
-            moveListStore: "ToDoListStore/moveList",
-            getWeather: "WeatherStore/getWeather",
+        ...mapActions({
+            editListTextStore: "ToDoListStore/editListText", //Dev 硯丞 編輯清單
+            deleteListStore: "ToDoListStore/deleteList", //Dev 硯丞 刪除清單
+            finishListStore: "ToDoListStore/finishList", //Dev 硯丞 完成清單
+            moveListStore: "ToDoListStore/moveList", //Dev 硯丞 移動清單
+            getWeather: "WeatherStore/getWeather", //Dev 硯丞 取得天氣
         }),
         ...mapMutations({
-            clearList: "ToDoListStore/clearList",
+            clearList: "ToDoListStore/clearList", //Dev 硯丞 全部清空
         }),
-        showAlert() {
+        showAlert() { //Dev 硯丞 取得天氣並使用彈窗顯示
             const url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?Authorization=CWA-0607CF65-9F25-43CD-A406-925A5427FB91&locationName=%E8%A5%BF%E5%8D%80&elementName=AT,T"
             try {
                 this.getWeather(url).then(() => {
@@ -102,7 +102,6 @@ export default {
             } catch (error) {
                 console.error("error weather:", error);
             }
-
         },
         addTask() {
             //Dev Note 硯丞 將要修改的待辦清單id及內容傳送到ToDoListthis.store做儲存，並清空要輸入的內容及選取的id，

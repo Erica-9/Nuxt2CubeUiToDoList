@@ -43,13 +43,13 @@ export default {
     }
   },
   mounted() {
-    this.$localStorage.set("data", { name: "bobee" });
-    this.$cookies.set("bobee", { age: 11 });
-    this.$session.set('user', { name: 'John' });
+    this.$localStorage.set("data", { name: "bobee" }); //Dev 硯丞 資料存進localStorage
+    this.$cookies.set("bobee", { age: 11 }); //Dev 硯丞 cookies
+    this.$session.set('user', { name: 'John' }); //Dev 硯丞 session
 
-    console.log("localStorage:", this.$localStorage.get("data"));
-    console.log("cookies:", this.$cookies.get("bobee"));
-    console.log("session:", this.$session.get('user'));
+    console.log("localStorage:", this.$localStorage.get("data")); //Dev 硯丞 把資料從localStorage取出
+    console.log("cookies:", this.$cookies.get("bobee")); //Dev 硯丞 把資料從cookies取出
+    console.log("session:", this.$session.get('user')); //Dev 硯丞 把資料從session取出
   }
 };
 </script>

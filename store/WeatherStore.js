@@ -1,7 +1,7 @@
 // store/WeatherStore.js
 import axios from "axios";
 export const state = () => ({
-  weather: [],
+  weather: [], //Dev 硯丞 天氣
 });
 
 export const getters = {
@@ -12,7 +12,7 @@ export const getters = {
 
 export const mutations = {
   setWeather(state, weather) {
-    //Dev 硯丞 加入代辦清單，List -> 要加入的待辦清單(array)，並且依照是否完成(done)做排序，完成的放在最後面
+    //Dev 硯丞 把體感溫度及溫度解構出來後塞入state內
     const bobyTemperature =
       weather.weatherElement[0].time[0].elementValue[0].value;
     const Temperature = weather.weatherElement[1].time[0].elementValue[0].value;
@@ -23,6 +23,7 @@ export const mutations = {
 
 export const actions = {
   async getWeather({ commit }, weatherApi) {
+    //Dev 硯丞 接取氣象局開源api+初步解構 weatherApi -> 由vue傳過來的api儲存變數
     try {
       const weather = await axios.get(weatherApi);
       commit("setWeather", weather.data.records.locations[0].location[0]);
