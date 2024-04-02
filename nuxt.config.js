@@ -26,6 +26,8 @@ export default {
     "~/plugins/localStorage.js",
     "~/plugins/cookie.js",
     "~/plugins/session.js",
+    "~/plugins/aes.js",
+    "~/plugins/sha.js",
     { src: "~/src/VConsole", ssr: false },
   ],
 
