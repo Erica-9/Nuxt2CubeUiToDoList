@@ -45,11 +45,11 @@ export default {
   mounted() {
     this.$localStorage.set("data", { name: "bobee" });
     this.$cookies.set("bobee", { age: 11 });
-    // this.$session.set('user', { name: 'John', age: 30 });
+    this.$session.set('user', { name: 'John' });
 
     console.log("localStorage:", this.$localStorage.get("data"));
     console.log("cookies:", this.$cookies.get("bobee"));
-    // console.log("session:", this.$session.get('user'));
+    console.log("session:", this.$session.get('user'));
   }
 };
 </script>

@@ -50,6 +50,23 @@ export const mutations = {
       }
     }
   },
+  moveList(state, listId) {
+    //Dev 硯丞 完成代辦清單，listId -> 要完成的待辦清單id(array)，依序找出對應id的清單的索引後依序完成，並且依照是否完成(done)做排序，完成的放在最後面
+    for (let i = 0; i < listId.length; i++) {
+      let finishData = state.lifeTasks.findIndex(
+        (item) => item.id === parseInt(listId[i])
+      );
+      if (finishData !== -1) {
+        const objectToMove = state.lifeTasks.splice(finishData, 1)[0];
+        // 插入到目标索引位置
+        const targetIndex = finishData + 1;
+        state.lifeTasks.splice(targetIndex, 0, objectToMove);
+
+        // state.lifeTasks[finishData].done = true;
+        // state.lifeTasks = state.lifeTasks.sort((a, b) => a.done - b.done);
+      }
+    }
+  },
   editListText(state, edit) {
     //Dev 硯丞 編輯特定代辦清單，edit(array) -> 要編輯的待辦清單id及內容text
     const editList = state.lifeTasks.findIndex((item) => item.id === edit.id);
@@ -80,6 +97,10 @@ export const actions = {
   finishList({ commit }, listId) {
     //Dev 硯丞 完成代辦清單，listId -> 要完成的待辦清單id(array)
     commit("finishList", listId);
+  },
+  moveList({ commit }, listId) {
+    //Dev 硯丞 完成代辦清單，listId -> 要完成的待辦清單id(array)
+    commit("moveList", listId);
   },
   editListText({ commit }, edit) {
     //Dev 硯丞 編輯特定代辦清單，edit -> 要編輯的待辦清單id及內容(array)

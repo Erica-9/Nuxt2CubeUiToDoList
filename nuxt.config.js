@@ -25,7 +25,7 @@ export default {
     "~/src/cube-ui",
     "~/plugins/localStorage.js",
     "~/plugins/cookie.js",
-    { src: "~/plugins/session.js", mode: "server" },
+    "~/plugins/session.js",
     { src: "~/src/VConsole", ssr: false },
   ],
 

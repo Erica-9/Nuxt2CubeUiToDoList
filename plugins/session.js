@@ -1,26 +1,22 @@
-// import session from "cookie-session";
-
-// export default ({ req, res }, inject) => {
-//   const handler = session({
-//     name: "session",
-//     keys: ["your-secret-key"],
-//     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-//   });
-
-//   handler(req, res, () => {});
-
-//   inject("session", {
-//     set: (name, value) => {
-//       req.session[name] = value;
-//     },
-//     get: (name) => {
-//       return req.session[name];
-//     },
-//     remove: (name) => {
-//       delete req.session[name];
-//     },
-//     removeAll: () => {
-//       req.session = null;
-//     },
-//   });
-// };
+export default ({ app }, inject) => {
+  inject("session", {
+    // 設定 key
+    set(key = "", val = {}) {
+      sessionStorage.setItem(key, JSON.stringify(val));
+    },
+    // 取得 key
+    get(key = "") {
+      const obj = JSON.parse(sessionStorage.getItem(key));
+      if (!obj) return {};
+      return obj;
+    },
+    // 移除 key
+    remove(key = "") {
+      sessionStorage.removeItem(key);
+    },
+    // 移除所有 key
+    removeAll() {
+      sessionStorage.clear();
+    },
+  });
+};

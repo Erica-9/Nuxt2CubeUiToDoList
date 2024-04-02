@@ -7,6 +7,8 @@
                     @click="finishList">完成</cube-button>
                 <cube-button v-show="newSelects.length != 0" :light="true" class="selectedButton"
                     @click="deleteList">刪除</cube-button>
+                <cube-button @click="moveList" v-show="newSelects.length != 0" :light="true" class="selectedButton">下移一格
+                    ↓ </cube-button>
             </div>
             <div class="weaterButton">
                 <cube-button :outline="true" @click="showAlert">現在天氣</cube-button>
@@ -51,7 +53,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 export default {
     data() {
@@ -65,6 +67,7 @@ export default {
         ...mapGetters({   // 對象形式 
             newPage: "ToDoListStore/newPage",
             lifeTasks: "ToDoListStore/lifeTasks",
+            weather: "WeatherStore/weather"
         }),
         lists() {
             // Dev 硯丞 重新渲染時清空目前選取的清單及編輯的id並篩選目前需顯示的待辦清單類型是工作還是生活
@@ -80,22 +83,26 @@ export default {
             editListTextStore: "ToDoListStore/editListText",
             deleteListStore: "ToDoListStore/deleteList",
             finishListStore: "ToDoListStore/finishList",
+            moveListStore: "ToDoListStore/moveList",
+            getWeather: "WeatherStore/getWeather",
         }),
         ...mapMutations({
             clearList: "ToDoListStore/clearList",
         }),
         showAlert() {
-            //Dev 硯丞 接取氣象局開源api，獲取現在西區的體感溫度及溫度
             const url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?Authorization=CWA-0607CF65-9F25-43CD-A406-925A5427FB91&locationName=%E8%A5%BF%E5%8D%80&elementName=AT,T"
-            axios.get(url).then((res) => {
-                const a = res.data.records.locations[0].location[0].weatherElement[0].time[0].elementValue[0].value
-                const b = res.data.records.locations[0].location[0].weatherElement[1].time[0].elementValue[0].value
-                this.$createDialog({
-                    type: 'alert',
-                    title: '現在天氣',
-                    content: "體感溫度：" + a + "℃" + " 溫度：" + b + "℃"
-                }).show()
-            });
+            try {
+                this.getWeather(url).then(() => {
+                    this.$createDialog({
+                        type: 'alert',
+                        title: '現在天氣',
+                        content: `體感溫度：${this.weather[0]}℃ 溫度：${this.weather[1]}℃`
+                    }).show()
+                });
+            } catch (error) {
+                console.error("error weather:", error);
+            }
+
         },
         addTask() {
             //Dev Note 硯丞 將要修改的待辦清單id及內容傳送到ToDoListthis.store做儲存，並清空要輸入的內容及選取的id，
@@ -121,6 +128,11 @@ export default {
         },
         finishList() {
             this.finishListStore(this.newSelects);
+            //Dev Note 硯丞 完成newSelects內已選取的待辦清單
+            this.newSelects = []
+        },
+        moveList() {
+            this.moveListStore(this.newSelects);
             //Dev Note 硯丞 完成newSelects內已選取的待辦清單
             this.newSelects = []
         },
@@ -206,6 +218,7 @@ ul li {
 }
 
 .contentButton button {
+    margin-right: 5px;
     width: 60px;
 }
 
