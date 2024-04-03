@@ -12,7 +12,7 @@
 try {//Dev Note 硯丞 try catch
   const a = avc();
 } catch (error) {
-  console.error("try catch 練習:", error);
+  console.error("try catch  練習:", error);
 }
 export default {
   mounted() {
