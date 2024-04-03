@@ -1,0 +1,29 @@
+image: node:14.21.3
+
+pipelines:
+  branches:
+    master:
+      - step:
+          caches:
+            - node
+          script: # Modify the commands below to build your repository.
+            - git fetch --unshallow origin
+            - git log --oneline
+            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git HEAD
+
+  tags:
+    release-*:
+      - step:
+          caches:
+            - node
+          script: # Modify the commands below to build your repository. 2
+            # DEV NOTE:20211116 ping 直接像master git push 會出現
+            # error: unable to push to unqualified destination: HEAD
+            # The destination refspec neither matches an existing ref on the remote nor
+            # begins with refs/, and we are unable to guess a prefix based on the source ref.
+            # 這邊補上 master 在切回去
+            - git checkout -b master
+            - git checkout master
+            - git fetch --unshallow origin
+            - git log --oneline
+            - git push --force --quiet https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME_OFFICIALLY.git HEAD
